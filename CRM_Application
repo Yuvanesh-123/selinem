@@ -1,0 +1,139 @@
+package SeleniumBasics;
+
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import org.openqa.selenium.Alert;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.interactions.Action;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.Select;
+
+import io.github.bonigarcia.wdm.WebDriverManager;
+
+public class merge {
+	WebDriver driver;
+
+	public WebDriver setUp() {
+		WebDriverManager.chromedriver().setup();
+		// Launch chrome driver
+		ChromeDriver driver = new ChromeDriver();
+		// load url
+		driver.get("http://leaftaps.com/opentaps/control/login");
+		// maximize the browser0
+		driver.manage().window().maximize();
+		// adding wait timer
+		driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(30));
+		System.out.println("*************** The Chrome Browser setup is done for Automation ***************");
+		return driver;
+	}
+
+	public void login(WebDriver driver) {
+		driver.findElement(By.id("username")).sendKeys("Demosalesmanager");
+		driver.findElement(By.id("password")).sendKeys("crmsfa");
+		driver.findElement(By.className("decorativeSubmit")).click();
+		driver.findElement(By.linkText("CRM/SFA")).click();
+		System.out.println("*************** The Login is completed ***************");
+	}
+
+	public void mergeContact(WebDriver driver) throws InterruptedException {
+		driver.findElement(By.linkText("Contacts")).click();
+		driver.findElement(By.xpath("//a[text()='Merge Contacts']")).click();
+		// selecting First Contact
+		driver.findElement(By.xpath("//img[@src='/images/fieldlookup.gif']")).click();
+
+		// handle the window of creating set and list
+		Set<String> windowTabs = driver.getWindowHandles();
+		List<String> child = new ArrayList<String>(windowTabs);
+
+		// switching the handel from Parent window to Child window
+		driver.switchTo().window(child.get(1));
+
+		// clicking the result
+		driver.findElement(By.xpath("(//a[@class='linktext'])[1]")).click();
+
+		// get back to the window
+		driver.switchTo().window(child.get(0));
+
+		// selecting Second Contact
+		driver.findElement(By.xpath("((//td[@class='titleCell'])[2]//following::img)[1]")).click();
+		// switching the handel from Parent window to Child window
+		Set<String> windowTabs2 = driver.getWindowHandles();
+		List<String> child2 = new ArrayList<String>(windowTabs2);
+		driver.switchTo().window(child2.get(1));
+		driver.findElement(By.xpath("(//a[@class='linktext'])[6]")).click();
+		driver.switchTo().window(child2.get(0));
+		driver.findElement(By.xpath("//a[@class='buttonDangerous']")).click();
+		// Alert
+		Alert alert = driver.switchTo().alert();
+		alert.accept();
+		Thread.sleep(5000);
+		System.out.println("*************** The contact is Merged ***************");
+
+	}
+
+	public void updateContact(WebDriver driver) throws InterruptedException {
+		driver.findElement(By.xpath("//a[text()='Leads']")).click();
+		driver.findElement(By.xpath("//a[text()='Find Leads']")).click();
+		driver.findElement(By.xpath("(//input[@name='firstName'])[3]")).sendKeys("Kishore");
+		driver.findElement(By.xpath("(//button[@class='x-btn-text'])[7]")).click();
+		Thread.sleep(2000);
+		driver.findElement(By.xpath("(//a[@class='linktext'])[4]")).click();
+		Thread.sleep(2000);
+		driver.findElement(By.xpath("(//a[@class='subMenuButton'])[3]")).click();
+		Thread.sleep(2000);
+		driver.findElement(By.id("updateLeadForm_companyName")).clear();
+		Thread.sleep(2000);
+		driver.findElement(By.id("updateLeadForm_companyName")).sendKeys("Testleaf");
+		Thread.sleep(2000);
+		// Handeling Drop Down
+		WebElement dropdownIndustry = driver.findElement(By.id("updateLeadForm_industryEnumId"));
+		Select selectIndustry = new Select(dropdownIndustry);
+		selectIndustry.selectByVisibleText("Computer Hardware");
+		// Drag and Drop
+		driver.findElement(By.id("updateLeadForm_birthDate-button")).click();
+		// WebElement on which drag and drop operation needs to be performed
+		Thread.sleep(2000);
+		WebElement fromElement = driver.findElement(By.className("footrow"));
+
+		// WebElement to which the above object is dropped
+		WebElement toElement = dropdownIndustry;
+
+		// Creating object of Actions class to build composite actions
+		Actions builder = new Actions(driver);
+
+		// Building a drag and drop action
+		Action dragAndDrop = builder.clickAndHold(fromElement).moveToElement(toElement).release(toElement).build();
+
+		// Performing the drag and drop action
+		dragAndDrop.perform();
+
+		Thread.sleep(3000);
+		driver.findElement(By.xpath("((//tr[@class='daysrow'])[3]/td)[2]")).click();
+
+		driver.findElement(By.className("smallSubmit")).click();
+		System.out.println("*************** The contact is Updated ***************");
+	}
+
+	public void closeAllWindows(WebDriver driver) {
+		driver.quit();
+		System.out.println("*************** The WebDriver session is terminated and the browser also closed  ***************");
+	}
+
+	public static void main(String[] args) throws InterruptedException {
+
+		merge object = new merge();
+		WebDriver driver2 = object.setUp();
+		object.login(driver2);
+		object.mergeContact(driver2);
+		object.updateContact(driver2);
+		object.closeAllWindows(driver2);
+
+	}
+
+}
